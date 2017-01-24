@@ -38,6 +38,7 @@ class Login(Resource):
         user = Users.query.filter_by(username=username).first()
         if user is None:
             abort(400, message="User doesnot exist")
+            # source: https://jwt.io/introduction/
         if user.verify_password(password):
             payload = {
                 'sub': user.user_id,
