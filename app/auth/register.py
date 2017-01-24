@@ -34,7 +34,7 @@ POST: Create a new User resource and adds them to the db
         email = data['email']
         password = data['password']
 
-        if len(password) < 6:
+        if len(password) < 4:
             abort(400,
                   message="Password should be more than 4 characters")
 
