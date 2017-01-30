@@ -1,11 +1,10 @@
-"""Here is where we setup the flask test client and the
-SQL Alchemy database session"""
-
 from config import config
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
+"""Here is where we setup the flask test client and the
+SQL Alchemy database session"""
 
 
 def create_app(config_name):
@@ -20,4 +19,4 @@ def create_app(config_name):
     return application
 
 
-app = create_app('develop')
+app = create_app('development')
