@@ -1,7 +1,7 @@
 import json
 import unittest
 from app import db
-from app.model.bucketist_models import Users
+from app.models.bucketist_models import Users
 from app.test_config import GlobalTestCase
 from flask import url_for
 
@@ -23,9 +23,9 @@ class RegistrationTest(GlobalTestCase):
         response = self.client.post(
             url_for('register'),
             data=json.dumps(
-                {'username': 'Ian',
-                 'password': 'ian',
-                 'email': 'ian123@andela.com'}),
+                {'username': 'johndoe',
+                 'password': 'john123',
+                 'email': 'johndoe123@andela.com'}),
             content_type='application/json')
         self.assertEqual(response.status_code, 200)
         data = json.loads(response.get_data(as_text=True))
@@ -35,17 +35,18 @@ class RegistrationTest(GlobalTestCase):
 
     def test_registration_of_existing_user(self):
         user = Users(
-            username='Ian',
-            email='ian123@gmail.com',
-            password='ian')
+            username='johndoe',
+            email='john123@gmail.com',
+            password='john')
         db.session.add(user)
         db.session.commit()
         response = self.client.post(
             url_for('register'),
             data=json.dumps(
-                {'username': 'Ian',
-                 'password': 'ian',
-                 'email': 'ian123@andela.com'}),
+                {'username': 'johndoe',
+                 'email': 'johndoe123@andela.com',
+                 'password': 'john123'
+                 }),
             content_type='application/json')
         data = json.loads(response.get_data(as_text=True))
         self.assertIsNotNone(data)
