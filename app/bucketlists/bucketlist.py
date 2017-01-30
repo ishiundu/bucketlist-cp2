@@ -15,7 +15,7 @@ def decode_token(self):
         abort(401, message="No Authoriztion token")
     try:
         payload = jwt.decode(token, Config.SECRET_KEY)
-    except jwt.DecoderError:
+    except jwt.DecodeError:
         abort(401, message='Token is invalid')
     except jwt.ExpiredSignature:
         abort(401, message='Session expired, please login again')
@@ -42,10 +42,11 @@ POST: Adds a bucketlist.
         # Here we impliment pagination
         limit = int(query_string.get('limit', 20))
         page_no = int(query_string.get('page', 1))
+
         if type(limit) is not int:
             abort(400, message="Make sure the limit is an integer")
         if type(page_no)is not int:
-            abort(400, message="|Make sure the limit is an integer")
+            abort(400, message="Make sure the limit is an integer")
         if 'q' in query_string:
             search_result = Bucketlists.query.filter(
                 Bucketlists.name.ilike(
@@ -58,57 +59,57 @@ POST: Adds a bucketlist.
                       message="{} does not match any bucketlist names".format(
                           query_string['q']))
 
-                for bucketlist in search_result.items:
-                    if bucketlist.creator_id is user_id:
-                        items = Items.query.filter_by(
-                            buckelist_id=bucketlist.buckelist_id).all()
-                        for item in items:
-                            item_list.append({
-                                "id": item.item_id,
-                                "name": item.name,
-                                "description": item.description,
-                                "date_created": item.date_created,
-                                "date_modified": item.date_modified,
-                                "completed": item.completed
-                            })
-                        result = {
-                            "id": bucketlist.buckelist_id,
-                            "name": bucketlist.name,
-                            "description": bucketlist.description,
-                            "date_created": bucketlist.date_created,
-                            "date_modified": bucketlist.date_modified,
-                            "creator": bucketlist.creator.username
-                        }
-                    bucketlist_list.append(result)
-                return jsonify(bucketlist_list)
+            for bucketlist in search_result.items:
+                if bucketlist.creator_id is user_id:
+                    items = Items.query.filter_by(
+                        bucketlist_id=bucketlist.buckelist_id).all()
+                    for item in items:
+                        item_list.append({
+                            "id": item.item_id,
+                            "name": item.name,
+                            "description": item.description,
+                            "date_created": item.date_created,
+                            "date_modified": item.date_modified,
+                            "completed": item.completed
+                        })
+                    result = {
+                        "id": bucketlist.buckelist_id,
+                        "name": bucketlist.name,
+                        "description": bucketlist.description,
+                        "date_created": bucketlist.date_created,
+                        "date_modified": bucketlist.date_modified,
+                        "creator": bucketlist.creator.username
+                    }
+                bucketlist_list.append(result)
+            return jsonify(bucketlist_list)
 
-            bucketlists = Bucketlists.query.filter_by(creator_id=user_id).paginate(
-                page_no, limit)
+        bucketlists = Bucketlists.query.filter_by(creator_id=user_id).paginate(
+            page_no, limit)
 
-            if not len(bucketlists.items):
-                abort(400, "User doesn't have a bucketlist")
-            for bucketlist in bucketlist_list.items:
-                item_list = []
-                items = Items.query.filter_by(
-                    bucketlist_id=bucketlist.bucketlist_id).all()
-                for item in items:
-                    item_list.append({
-                        "id": item.item_id,
-                        "name": item.name,
-                        "description": item.description,
-                        "date_created": item.date_created,
-                        "date_modified": item.date_modified,
-                        "completed": item.completed
-                    })
-                result = {
-                    "id": bucketlist.bucketlist_id,
-                    "name": bucketlist.name,
-                    "description": bucketlist.description,
-                    "date_created": bucketlist.date_created,
+        if not len(bucketlists.items):
+            abort(400, message="User doesn't have a bucketlist")
+        for bucketlist in bucketlists.items:
+            item_list = []
+            items = Items.query.filter_by(
+                bucketlist_id=bucketlist.bucketlist_id).all()
+            for item in items:
+                item_list.append({
+                    "id": item.item_id,
+                    "name": item.name,
+                    "description": item.description,
+                    "date_created": item.date_created,
                     "date_modified": item.date_modified,
-                    "creator": bucketlist.creator.username
-                }
-            bucketlist_list.append(result)
+                    "completed": item.completed
+                })
+            result = {
+                "id": bucketlist.bucketlist_id,
+                "name": bucketlist.name,
+                "description": bucketlist.description,
+                "date_created": bucketlist.date_created,
+                "date_modified": bucketlist.date_modified,
+                "creator": bucketlist.creator.username.decode('utf-8')
+            }
+        bucketlist_list.append(result)
         next_page = 'None'
         previous_page = 'None'
         if bucketlists.has_next:
@@ -116,7 +117,7 @@ POST: Adds a bucketlist.
                 str(request.url_root),
                 str(limit),
                 str(page_no + 1))
-        if bucketlists.has_previous:
+        if bucketlists.has_prev:
             previous_page = "{}api/v1/bucketlists?limit={}&page={}".format(
                 str(request.url_root),
                 str(limit),
@@ -135,23 +136,24 @@ POST: Adds a bucketlist.
         if not data:
             abort(400,
                   message="Please supply all the parameters")
-        name = data['name']
-        description = data['description']
+        name = data['bucket_name']
+        description = data['bucket_description']
         creator_id = user_id
 
         if not name:
             abort(400, "Name cannot be empty")
-            bucketlist = Bucketlists.query.filter_by(
-                name=name,
-                creator_id=user_id)
+        bucketlist = Bucketlists.query.filter_by(
+            name=name,
+            creator_id=user_id).first()
         if bucketlist:
-            abort(400, "{} bucketlist already exists".format(bucketlist.name))
+            abort(400, message="{} bucketlist already exists".format(bucketlist.name))
 
         try:
             new_bucketlist = Bucketlists(
                 name=name,
                 description=description,
                 date_created=datetime.utcnow(),
+                date_modified=datetime.utcnow(),
                 creator_id=creator_id
             )
             db.session.add(new_bucketlist)
@@ -173,27 +175,17 @@ class OneBucketlist(Resource):
         if not single_bucketlist:
             abort(400, messgae="No bucketlist matching the the id {}".format(
                 bucketlist_id))
-        items = Items.query.filter_by(
+        bucket = Bucketlists.query.filter_by(
             bucketlist_id=bucketlist_id).first()
-        for item in items:
-            item_list.append({
-                "id": item.item_id,
-                "name": item.name,
-                "description": item.description,
-                "date_created": item.date_created,
-                "date_modified": item.date_modified,
-                "completed": item.completed
+        
+        return jsonify({
+            "id": bucket.bucketlist_id,
+            "name": bucket.name,
+            "description": bucket.description,
+            "date_created": bucket.date_created,
+            "date_modified": bucket.date_modified,
+            "owner": bucket.creator_id
             })
-        result.update({
-            single_bucketlist.bucketlist_id: {
-                "name": single_bucketlist.name,
-                "description": single_bucketlist.description,
-                "items": item_list,
-                "date_created": single_bucketlist.date_created,
-                "date_modified": item.date_modified,
-                "completed": item.completed
-            }})
-        return jsonify(result)
 
     def put(self, bucketlist_id):
         user_id = decode_token(request)
@@ -207,14 +199,14 @@ class OneBucketlist(Resource):
             creator_id=user_id,
             bucketlist_id=bucketlist_id).first()
         if not single_bucketlist:
-            abort(400, message="Sorry we can't find a bucketlist matching the id{}".format(
+            abort(400, message="Sorry we can't find a bucketlist matching the id {}".format(
                 bucketlist_id))
 
         try:
-            if 'name' in data.keys():
-                single_bucketlist.name = data['name']
-            if 'description' in data.keys():
-                single_bucketlist.description = data['description']
+            if 'new_bucket_name' in data.keys():
+                single_bucketlist.name = data['new_bucket_name']
+            if 'new_bucket_description' in data.keys():
+                single_bucketlist.description = data['new_bucket_description']
             single_bucketlist.date_modified = datetime.utcnow()
             db.session.add(single_bucketlist)
             db.session.commit()
@@ -232,17 +224,16 @@ class OneBucketlist(Resource):
             creator_id=user_id,
             bucketlist_id=bucketlist_id).first()
         if not single_bucketlist:
-            abort(400, message="We can't find the bucketlist matching id{}".format(
+            abort(400, message="We can't find the bucketlist matching id {}".format(
                 bucketlist_id))
 
         try:
-            items = Items.query.filter_by(
-                bucketlist_id=bucketlist_id).all()
-            for item in items:
-                db.session.delete(item)
-                db.session.commit()
-                return jsonify({
-                    'message': "{} bucketlist was successfuly deleted".format(
-                        single_bucketlist.name)})
+            bucket = Bucketlists.query.filter_by(
+                bucketlist_id=bucketlist_id).first()
+            db.session.delete(bucket)
+            db.session.commit()
+            return jsonify({
+                'message': "{} bucketlist was successfuly deleted".format(
+                    single_bucketlist.name)})
         except Exception:
             abort(500, message="An Error occured, Bucketlist was not deleted")
