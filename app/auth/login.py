@@ -20,7 +20,7 @@ class Index(Resource):
 class Login(Resource):
     def get(self):
         return jsonify({"message": "To login,"
-                        "send a post request to auth/login"})
+                        "send a POST request to /auth/login"})
 
     def post(self):
         data = json.loads(request.get_data(as_text=True))
@@ -28,24 +28,26 @@ class Login(Resource):
             abort(
                 400,
                 message="No parameters passed. Please fill all fields")
-            username = data['username']
+        else:
+            username = data['username'].encode('utf-8')
             password = data['password']
 
-        if not username or password:
+
+        if not username or not password:
             abort(400,
                   message="Kindly fill in the missing details")
 
         user = Users.query.filter_by(username=username).first()
-        if user is None:
-            abort(400, message="User doesnot exist")
+        if not user:
+            abort(400, message="User does not exist")
             # source: https://jwt.io/introduction/
-        if user.verify_password(password):
+        if user.check_password(password):
             payload = {
                 'sub': user.user_id,
-                'exp': datetime.utcnow() + timedelta(minute=30)
+                'exp': datetime.utcnow() + timedelta(minutes=30)
             }
             token = jwt.encode(
                 payload, Config.SECRET_KEY, algorithm='HS256')
-            return jsonify({"message": "Welcome {}".format(user.username),
+            return jsonify({"message": "Welcome {}".format(user.username.decode('utf-8')),
                             "token": token.decode('utf-8')})
         abort(400, message="Invalid password")
