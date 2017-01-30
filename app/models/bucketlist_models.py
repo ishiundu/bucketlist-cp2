@@ -1,9 +1,9 @@
 # Resource http://flask-sqlalchemy.pocoo.org/2.1/models/
-
 import passlib
 from app import db
 from datetime import datetime
 from sqlalchemy_utils import PasswordType
+# from werkzeug.security import generate_password_hash, check_password_hash
 
 
 class Users(db.Model):
@@ -16,6 +16,7 @@ class Users(db.Model):
     user_id = db.Column(db.Integer, primary_key=True, autoincrement=True)
     username = db.Column(db.String(80), unique=True)
     email = db.Column(db.String(120), nullable=False)
+    password = db.Column(db.String(100), nullable=False)
     password = db.Column(PasswordType(onload=lambda **kwargs: dict(
         schemes=[
             'pbkdf2_sha512',
@@ -25,7 +26,7 @@ class Users(db.Model):
         **kwargs
     ), ), unique=False, nullable=False)
 
-    def verify_password(self, password):
+    def check_password(self, password):
         """Here we verify a user's password"""
         return self.password == password
 
@@ -49,6 +50,8 @@ class Bucketlists(db.Model):
                               backref=db.backref('bucketlists',
                                                  lazy='dynamic'))
 
+    def __repr___(self):
+        return 'Bucket name {} >'.format(self.name)
 
 class Items(db.Model):
     """
@@ -66,7 +69,7 @@ class Items(db.Model):
         default=datetime.utcnow())
     date_modified = db.Column(
         db.DateTime(timezone=True),
-        nullable=True)
+        default=datetime.utcnow())
     bucketlist_id = db.Column(db.Integer,
                               db.ForeignKey('bucketlists.bucketlist_id'),
                               nullable=False)
