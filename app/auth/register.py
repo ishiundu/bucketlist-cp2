@@ -19,18 +19,18 @@ POST: Create a new User resource and adds them to the db
     def post(self):
         data = json.loads(request.get_data(as_text=True))
         if not data:
-                # Incase user doesn't pass anythin
+                # Incase user doesn't pass anything
             abort(400,
-                  message="No parameters supplied, please make sure all fields are field")
+                  message="No parameters supplied, please make sure all fields are passed")
         if len(data.keys()) < 3:
                 # Incase a user doesn't pass all the 3 params
             abort(400,
                   message="Please make sure ALL parameters are filled")
-        if not data['username'] or not data['username'] or not data['password']:
+        if not data['username'] or not data['email'] or not data['password']:
             abort(400,
                   message="Kindly fill in the missing field")
 
-        username = data['username']
+        username = data['username'].encode('utf-8')
         email = data['email']
         password = data['password']
 
@@ -38,11 +38,11 @@ POST: Create a new User resource and adds them to the db
             abort(400,
                   message="Password should be more than 4 characters")
 
-        if '@' or '.' not in email:
+        if ('@' or '.') not in email:
             abort(400,
                   message="Please make sure you supplied a valid email")
 
-        user = Users.query.filte_by(username=username).first()
+        user = Users.query.filter_by(username=username).first()
         if user is not None:
             abort(400,
                   message="A user with that username exists!")
@@ -56,6 +56,6 @@ POST: Create a new User resource and adds them to the db
             db.session.add(new_user)
             db.session.commit()
             return jsonify({
-                'message': "{} added successfully".format(username)})
+                'message': "{} added successfully".format(username.decode('utf-8'))})
         except Exception as e:
-        	abort(500, message="User not created")
+            abort(500, message=str(e))
