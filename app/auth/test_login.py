@@ -11,9 +11,9 @@ class LoginTest(GlobalTestCase):
     def SetUp(self):
         db.create_all()
         user = Users(
-            username='ianshiundu',
-            email='ianshiundu@andela.com',
-            password='i@n123')
+            username='johndoe',
+            email='johndoe123@andela.com',
+            password='john123')
         db.session.add(user)
         db.session.commit()
 
@@ -28,7 +28,7 @@ class LoginTest(GlobalTestCase):
         response = self.client.get('api/v1/auth/login')
         data = json.loads(response.get_data(as_text=True))
         self.assert_status(response, 200)
-        self.assertEqual('To login, send a POST requestto /auth/login.',
+        self.assertEqual('To login,send a POST request to /auth/login',
                          data['message'])
 
     def test_correct_login_credentials(self):
@@ -36,13 +36,13 @@ class LoginTest(GlobalTestCase):
         response = self.client.post(
             url_for('login'),
             data=json.dumps(
-                {'username': 'Ian',
-                 'password': 'ian123'}),
+                {'username': 'johndoe',
+                 'password': 'john123'}),
             content_type='application/json')
         self.assert_status(response, 400)
         data = json.loads(response.get_data(as_text=True))
         self.assertIsNotNone(data)
-        self.assertIn("User does not exist", data['message'])
+        self.assertIn("Welcome Ian", data['message'])
 
     def test_login_with_non_existent_user(self):
         response = self.client.post(
