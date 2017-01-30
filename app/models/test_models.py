@@ -15,11 +15,11 @@ items.
         db.create_all()
         self.user = Users(
             username="johndoe",
-            email="johndoe@andela.com",
-            password="J0hny123")
+            email="johndoe123@andela.com",
+            password="john123")
         db.session.add(self.user)
         db.session.commit()
-        user = Users.query.filter_by(username='user1').first()
+        user = Users.query.filter_by(username='johndoe').first()
         self.bucketlist = Bucketlists(
             name="Maasai Mara",
             description="Go see the big 5",
