@@ -18,8 +18,8 @@ curl -i -H 'Accept: application/json' 'http://localhost:5000/register'
 HTTP/1.0 200 OK
 Content-Type: application/json
 Content-Length: 159
-Server: Werkzeug/0.10.4 Python/2.7.10
-Date: Fri, 23 Oct 2015 17:33:15 GMT
+Server: Werkzeug/0.10.4 Python/3.5
+Date: Fri, 27 Jan 2016 17:33:15 GMT
 
 {"message": "Welcome to the bucketlist service", "more": "To register make a POST request to /register ENDPOINT with [username] and [password]"}
 ```
@@ -44,7 +44,7 @@ python manager.py createdb -t
 ###How To Start The Server
 Run the following command to start the server and begin listening for requests to each endpoints.
 ```
-python run.py production
+python run.py development
 ```
 
 You can get available environment options by running:
