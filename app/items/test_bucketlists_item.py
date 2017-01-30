@@ -13,9 +13,9 @@ class BucketListItemTest(GlobalTestCase):
         db.drop_all()
         db.create_all()
         self.user = Users(
-            username='Ian',
-            email='ian123@andela.com',
-            password='i@n123')
+            username='johndoe',
+            email='johndoe123@andela.com',
+            password='john123')
         db.session.add(self.user)
         db.session.commit()
         user = Users.query.filter_by(username='Ian').first()
@@ -31,7 +31,7 @@ class BucketListItemTest(GlobalTestCase):
             url_for('login'),
             data=json.dumps({
                 'username': 'Ian',
-                'password': 'i@n123'}),
+                'password': 'ian123'}),
             content_type='application/json')
         data = json.loads(response.get_data(as_text=True))
         self.token = {'Authorization': data['token']}
