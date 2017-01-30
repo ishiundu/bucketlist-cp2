@@ -90,3 +90,5 @@ ENV/
 .DS_Store
 venv-flask
 .db
+venv-flask3/
+silicon.db
