@@ -62,7 +62,7 @@ POST: Adds a bucketlist.
             for bucketlist in search_result.items:
                 if bucketlist.creator_id is user_id:
                     items = Items.query.filter_by(
-                        bucketlist_id=bucketlist.buckelist_id).all()
+                        bucketlist_id=bucketlist.bucketlist_id).all()
                     for item in items:
                         item_list.append({
                             "id": item.item_id,
@@ -73,7 +73,7 @@ POST: Adds a bucketlist.
                             "completed": item.completed
                         })
                     result = {
-                        "id": bucketlist.buckelist_id,
+                        "id": bucketlist.bucketlist_id,
                         "name": bucketlist.name,
                         "description": bucketlist.description,
                         "date_created": bucketlist.date_created,
