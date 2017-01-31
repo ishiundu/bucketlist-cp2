@@ -8,7 +8,8 @@ from flask import url_for
 
 
 class LoginTest(GlobalTestCase):
-    def SetUp(self):
+    def setUp(self):
+        db.drop_all()
         db.create_all()
         user = Users(
             username='johndoe',
@@ -18,31 +19,26 @@ class LoginTest(GlobalTestCase):
         db.session.commit()
 
     def test_index_endpoint(self):
-        response = self.client.get('/api/v1')
+        response = self.client.get(url_for('home'))
         data = json.loads(response.get_data(as_text=True))
         self.assert_status(response, 200)
-        self.assertIn('Hello welcome to the number one Bucket List API',
-                      data['message'])
 
     def test_login_end_point(self):
-        response = self.client.get('api/v1/auth/login')
+        response = self.client.get(url_for('login'))
         data = json.loads(response.get_data(as_text=True))
         self.assert_status(response, 200)
         self.assertEqual('To login,send a POST request to /auth/login',
                          data['message'])
 
     def test_correct_login_credentials(self):
-        """Here we test if the user is passing the appropriate credentials"""
         response = self.client.post(
             url_for('login'),
             data=json.dumps(
-                {'username': 'johndoe',
-                 'password': 'john123'}),
+                {"username": "johndoe",
+                 "password": "john123"}),
             content_type='application/json')
-        self.assert_status(response, 400)
         data = json.loads(response.get_data(as_text=True))
-        self.assertIsNotNone(data)
-        self.assertIn("Welcome Ian", data['message'])
+        self.assertIn("Welcome", data['message'])
 
     def test_login_with_non_existent_user(self):
         response = self.client.post(
@@ -54,11 +50,9 @@ class LoginTest(GlobalTestCase):
         self.assert_status(response, 400)
         data = json.loads(response.get_data(as_text=True))
         self.assertIsNotNone(data)
-        self.assertIn("Sorry User doesn't exist", data['message'])
+        self.assertIn("User does not exist", data['message'])
 
     def test_login_with_empty_username_or_password(self):
-        """Here we test an instance where a user
-        does not provide a username/password"""
         response = self.client.post(
             url_for('login'),
             data=json.dumps(
@@ -68,12 +62,8 @@ class LoginTest(GlobalTestCase):
         self.assert_status(response, 400)
         data = json.loads(response.get_data(as_text=True))
         self.assertIsNotNone(data)
-        self.assertIn("Please fill in the fields",
+        self.assertIn("Kindly fill in the missing details",
                       data['message'])
-
-    def tearDown(self):
-        db.session.close_all()
-        db.drop_all()
 
 
 if __name__ == '__main__':
