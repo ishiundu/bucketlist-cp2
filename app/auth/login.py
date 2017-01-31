@@ -29,7 +29,7 @@ class Login(Resource):
                 400,
                 message="No parameters passed. Please fill all fields")
         else:
-            username = data['username'].encode('utf-8')
+            username = data['username']
             password = data['password']
 
 
@@ -38,16 +38,19 @@ class Login(Resource):
                   message="Kindly fill in the missing details")
 
         user = Users.query.filter_by(username=username).first()
+         
         if not user:
             abort(400, message="User does not exist")
-            # source: https://jwt.io/introduction/
+            
+
         if user.check_password(password):
             payload = {
-                'sub': user.user_id,
+               'sub': user.user_id,
                 'exp': datetime.utcnow() + timedelta(minutes=30)
             }
             token = jwt.encode(
                 payload, Config.SECRET_KEY, algorithm='HS256')
-            return jsonify({"message": "Welcome {}".format(user.username.decode('utf-8')),
+            return jsonify({"message": "Welcome {}".format(user.username),
                             "token": token.decode('utf-8')})
-        abort(400, message="Invalid password")
+        else:
+            abort(400, message="Invalid password")
