@@ -28,6 +28,7 @@ class Users(db.Model):
 
     def check_password(self, password):
         """Here we verify a user's password"""
+        print(self.password, password)
         return self.password == password
 
 
