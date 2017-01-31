@@ -12,6 +12,7 @@ items.
     """
 
     def setUp(self):
+        db.drop_all()
         db.create_all()
         self.user = Users(
             username="johndoe",
@@ -26,20 +27,20 @@ items.
             date_created=datetime.datetime.utcnow(),
             creator_id=user.user_id
         )
-        db.session.add(self.bucketlist_items)
+        db.session.add(self.bucketlist)
         db.session.commit()
 
     def test_can_create_user(self):
-        user = Users.query.filter_by(username='user1').first()
-        self.assertIsInstance(self.user, Users)
+        user = Users.query.filter_by(username='johndoe').first()
+        self.assertIsInstance(user, Users)
         self.assertIsNotNone(user.username)
-        self.assertEqual(user.email, 'user@andela.com')
+        self.assertEqual(user.email, 'johndoe123@andela.com')
 
     def test_can_edit_user(self):
         self.user.email = 'user@gmail.com'
         db.session.merge(self.user)
         db.session.commit()
-        user = Users.query.filter_by(username='user').first()
+        user = Users.query.filter_by(username='johndoe').first()
         self.assertEqual(user.email, 'user@gmail.com')
 
     def test_can_create_bucketlist(self):
@@ -50,20 +51,20 @@ items.
 
     def test_can_edit_bucketlist(self):
         self.bucketlist.name = "Fort Jesus"
-        db.session.add(self.bucketlist)
+        db.session.merge(self.bucketlist)
         db.session.commit()
-        item = Items.query.filter_by(name="Kruger Park").first()
-        self.assertEqual(item.name, "Kruger Park")
+        bucketlist = Bucketlists.query.filter_by(name='Fort Jesus').first()
+        self.assertEqual(bucketlist.name, "Fort Jesus")
 
     def test_can_delete_item_in_bucketlist(self):
-        db.session.delete(self.bucketlist_items)
+        db.session.delete(self.bucketlist)
         db.session.commit()
-        item = Items.query.filter_by(name="Kruger Park").first()
-        self.assertEqual(item, None)
+        bucketlist = Bucketlists.query.filter_by(name='Maasai Mara').first()
+        self.assertEqual(bucketlist, None)
 
-    def tearDown(self):
-        db.session.close_all()
-        db.session.drop_all()
+    # def tearDown(self):
+    #     db.session.close_all()
+    #     db.session.drop_all()
 
 
 if __name__ == '__main__':
