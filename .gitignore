@@ -92,3 +92,4 @@ venv-flask
 .db
 venv-flask3/
 silicon.db
+Test.db
