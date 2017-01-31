@@ -65,7 +65,7 @@ DELETE: Removes the item from the bucketlist
                             "date_created": item.date_created,
                             "date_modified": item.date_modified,
                             "bucketlist": item.bucketlist.name,
-                            "owner": item.bucketlist.creator.name.decode('utf-8')
+                            "owner": item.bucketlist.creator.username
                         }
                         item_list.append(result)
             return jsonify(item_list)
@@ -79,7 +79,7 @@ DELETE: Removes the item from the bucketlist
                 "date_created": item.date_created,
                 "date_modified": item.date_modified,
                 "bucketlist": item.bucketlist.name,
-                "owner": item.bucketlist.creator.username.decode('utf-8')
+                "owner": item.bucketlist.creator.username
             }
             item_list.append(result)
         next_page = 'None'
