@@ -1,4 +1,5 @@
 # bucketlist-cp2
+[![Build Status](https://travis-ci.org/andela-ian/bucketlist-cp2.svg?branch=master)](https://travis-ci.org/andela-ian/bucketlist-cp2)
 --------------------------------------------------
 This is a bucketlist service API built using Flask.
 
