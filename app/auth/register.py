@@ -30,7 +30,7 @@ POST: Create a new User resource and adds them to the db
             abort(400,
                   message="Kindly fill in the missing field")
 
-        username = data['username'].encode('utf-8')
+        username = data['username']
         email = data['email']
         password = data['password']
 
@@ -56,6 +56,6 @@ POST: Create a new User resource and adds them to the db
             db.session.add(new_user)
             db.session.commit()
             return jsonify({
-                'message': "{} added successfully".format(username.decode('utf-8'))})
+                'message': "{} added successfully".format(username)})
         except Exception as e:
             abort(500, message=str(e))
