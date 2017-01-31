@@ -1,7 +1,7 @@
 import json
 import unittest
 from app import db
-from app.models.bucketist_models import Users
+from app.models.bucketlist_models import Users
 from app.test_config import GlobalTestCase
 from flask import url_for
 
@@ -9,15 +9,22 @@ from flask import url_for
 class RegistrationTest(GlobalTestCase):
 
     def setUp(self):
+        db.drop_all()
         db.create_all()
+        user = Users(
+            username='paul',
+            email='paul@andela.com',
+            password='12345')
+        db.session.add(user)
+        db.session.commit()
+        
 
     def test_register_endpoint(self):
         response = self.client.get(
             url_for('register'))
         data = json.loads(response.get_data(as_text=True))
         self.assert_status(response, 200)
-        self.assertEqual('To register, send a POST request with your username, password and email to /auth/register',
-                         data['message'])
+        self.assertIn('Welcome,to register', data['message'])
 
     def test_registration_of_a_new_user(self):
         response = self.client.post(
@@ -30,28 +37,20 @@ class RegistrationTest(GlobalTestCase):
         self.assertEqual(response.status_code, 200)
         data = json.loads(response.get_data(as_text=True))
         self.assertIsNotNone(data)
-        self.assertIn("User, created successfully",
-                      data['message'])
+        self.assertIn("added successfully", data['message'])
 
     def test_registration_of_existing_user(self):
-        user = Users(
-            username='johndoe',
-            email='john123@gmail.com',
-            password='john')
-        db.session.add(user)
-        db.session.commit()
         response = self.client.post(
             url_for('register'),
             data=json.dumps(
-                {'username': 'johndoe',
-                 'email': 'johndoe123@andela.com',
-                 'password': 'john123'
+                {'username': 'paul',
+                 'email': 'paul@andela.com',
+                 'password': '12345'
                  }),
             content_type='application/json')
         data = json.loads(response.get_data(as_text=True))
         self.assertIsNotNone(data)
-        self.assertIn("That user already exists!",
-                      data['message'])
+        self.assertIn("user with that username exists", data['message'])
 
     def test_registration_with_short_password(self):
         response = self.client.post(
@@ -64,12 +63,7 @@ class RegistrationTest(GlobalTestCase):
         self.assertEqual(response.status_code, 400)
         data = json.loads(response.get_data(as_text=True))
         self.assertIsNotNone(data)
-        self.assertIn("Your password doesnot meet the specified requirements",
-                      data['message'])
-
-    def tearDown(self):
-        db.session.close_all()
-        db.drop_all()
+        self.assertIn("Password should be more than 4 characters", data['message'])
 
 
 if __name__ == '__main__':
