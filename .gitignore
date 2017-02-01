@@ -87,3 +87,9 @@ ENV/
 
 # Rope project settings
 .ropeproject
+.DS_Store
+venv-flask
+.db
+venv-flask3/
+silicon.db
+Test.db
